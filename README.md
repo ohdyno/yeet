@@ -8,6 +8,7 @@ Interactive CLI that lets you search YouTube, pick a result, and stream audio-on
 - Streams audio via `mpv --no-video` so you get music without video windows.
 - Graceful handling of missing binaries, empty searches, cancelled playback, and other runtime hiccups.
 - Paginated results with `n` / `p` controls so you can go beyond the first 10 matches.
+- Includes a single-file launcher (`./yeet-player`) so you can run the tool directly.
 
 ## Prerequisites
 - [`mise`](https://mise.jdx.dev) for toolchain orchestration.
@@ -32,7 +33,12 @@ mise run dev
 
 # or, if you prefer raw uv
 uv run python -m yeet_player
+
+# or run the single-file launcher
+./yeet-player
 ```
+
+The launcher automatically re-execs inside `.venv` (created via `mise run sync`) so dependencies from `uv` are available.
 
 Flow:
 1. Enter a search phrase (e.g., `lofi hip hop`).
