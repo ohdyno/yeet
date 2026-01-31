@@ -1,26 +1,10 @@
-#!/usr/bin/env python3
-"""Single-file launcher that delegates to `mise run dev`."""
+#!/usr/bin/env bash
 
-from __future__ import annotations
+set -euo pipefail
 
-import shutil
-import subprocess
-import sys
+if ! command -v mise >/dev/null 2>&1; then
+  echo "Missing required executable 'mise'. Install it first." >&2
+  exit 1
+fi
 
-
-def main() -> None:
-    mise = shutil.which("mise")
-    if mise is None:
-        sys.stderr.write("Missing required executable 'mise'. Install it first.\n")
-        raise SystemExit(1)
-
-    command = [mise, "run", "dev"]
-    if len(sys.argv) > 1:
-        command.append("--")
-        command.extend(sys.argv[1:])
-
-    raise SystemExit(subprocess.call(command))
-
-
-if __name__ == "__main__":
-    main()
+mise run dev -- "$@"

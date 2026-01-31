@@ -34,9 +34,11 @@ mise run dev
 # or, if you prefer raw uv
 uv run python -m yeet_player
 
-# or run the single-file launcher (delegates to `mise run dev`)
+# or run the single-file launcher (delegates to `mise run dev` via bash)
 ./yeet-player
 ```
+
+The launcher is a bash script, so it works as long as `mise` is on your PATH—no direct Python invocation required.
 
 Flow:
 1. Enter a search phrase (e.g., `lofi hip hop`).
