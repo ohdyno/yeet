@@ -1,0 +1,11 @@
+[tools]
+python = "3.12"
+uv = "latest"
+
+[tasks.sync]
+description = "Install project dependencies via uv"
+run = "uv sync"
+
+[tasks.dev]
+description = "Launch the interactive CLI"
+run = "uv run python -m yeet_player"

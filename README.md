@@ -1,34 +1,54 @@
 # YouTube Audio CLI Player
 
-## Goal
-- Build a personal CLI music player that searches YouTube, shows selectable hits, and streams audio-only playback.
-- Keep the tool stateless with no persisted data; every run is a fresh interactive shell.
-- Rely on existing system utilities (`yt-dlp`, `mpv`) and manage Python code via `uv` (wrapped by `mise`).
+Interactive CLI that lets you search YouTube, pick a result, and stream audio-only playback through `mpv`. Everything runs locally, stays stateless, and leans on `uv` + `mise` for painless dependency management.
 
-## Tooling & Dependencies
-- `uv` manages the Python project: initialization (`uv init --src src`), dependency installs (`uv add ...`), and execution (`uv run ...`).
-- `.mise.toml` will pin required tool versions and expose handy tasks (e.g., `mise run dev` → `uv run python -m yeet_player`).
-- External binaries required at runtime: `yt-dlp` for searching/URL resolution and `mpv` (or compatible player) for audio output.
+## Features
+- Prompt-driven shell built with `prompt_toolkit` (type queries, navigate with simple inputs).
+- Rich-formatted results table showing title, channel, and duration for the top matches.
+- Streams audio via `mpv --no-video` so you get music without video windows.
+- Graceful handling of missing binaries, empty searches, cancelled playback, and other runtime hiccups.
 
-## Proposed Structure
-- `src/yeet_player/cli.py`: entry point with the interactive loop.
-- `src/yeet_player/search.py`: wraps `yt-dlp --dump-json "ytsearchN:<query>"` and parses results.
-- `src/yeet_player/player.py`: launches `mpv --no-video <url>` (handles stop/cancel flow).
-- `src/yeet_player/ui.py`: presentation/helpers using `prompt_toolkit` or similar for numbered selection lists.
-- `pyproject.toml` + `uv.lock`: generated/maintained by `uv`.
+## Prerequisites
+- [`mise`](https://mise.jdx.dev) for toolchain orchestration.
+- [`uv`](https://astral.sh/blog/uv-unified-python-management) (installed automatically by `mise run install` or manually via their install script).
+- System binaries:
+  - `yt-dlp` (macOS: `brew install yt-dlp`).
+  - `mpv` (macOS: `brew install mpv`).
 
-## User Flow
-1. Launch via `uv run python -m yeet_player` (or a dedicated command exposed through `mise`).
-2. Prompt for a search term; fetch top ~10 results using `yt-dlp` and show title, channel, duration.
-3. User selects an index; the player streams audio-only via `mpv` until completion or cancellation.
-4. After playback, the shell loops back for additional searches or accepts a quit command.
+## Setup
+```bash
+# install tool versions and sync the virtualenv
+mise install
+mise run sync
+```
 
-## Error Handling & UX Notes
-- Check for presence of `yt-dlp` and `mpv` at startup; surface actionable instructions if missing.
-- Handle empty search results, invalid selections, and subprocess failures with clear messages.
-- Keep the CLI lightweight but provide room to extend (queues, skip controls) after MVP.
+Behind the scenes `mise` pins Python 3.12 and the latest `uv`. `uv sync` creates `.venv` and installs the Python dependencies (`prompt_toolkit`, `rich`).
 
-## Next Steps
-1. Initialize the Python project with `uv` and record the toolchain in `.mise.toml`.
-2. Implement the modules listed above with robust subprocess handling and interactive prompts.
-3. Document installation steps (installing `uv`, `yt-dlp`, `mpv`) and usage examples in this README.
+## Usage
+```bash
+# start the interactive player
+mise run dev
+
+# or, if you prefer raw uv
+uv run python -m yeet_player
+```
+
+Flow:
+1. Enter a search phrase (e.g., `lofi hip hop`).
+2. Review the numbered list of results.
+3. Pick a track number to stream audio via `mpv`.
+4. Press enter to launch a new search or `q` to quit at any prompt.
+
+## Project Structure
+- `pyproject.toml` / `uv.lock` — project + dependency metadata managed by `uv`.
+- `.mise.toml` — toolchain pinning + helper tasks.
+- `src/yeet_player/cli.py` — program entry point and control loop.
+- `src/yeet_player/search.py` — wraps `yt-dlp` to fetch search hits.
+- `src/yeet_player/ui.py` — user prompts and pretty result tables.
+- `src/yeet_player/player.py` — audio playback through `mpv`.
+- `src/yeet_player/errors.py` / `deps.py` / `models.py` — shared plumbing.
+
+## Future Enhancements
+- Queueing and skipping tracks without re-running searches.
+- Configurable result counts and output verbosity.
+- Optional caching of recent searches.

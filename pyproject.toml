@@ -1,0 +1,20 @@
+[project]
+name = "yeet-player"
+version = "0.1.0"
+description = "Interactive CLI that searches YouTube and streams audio-only playback"
+readme = "README.md"
+authors = [
+    { name = "Xing Zhou", email = "xing@xingzhou.me" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "prompt-toolkit>=3.0",
+    "rich>=13.0"
+]
+
+[project.scripts]
+yeet-player = "yeet_player.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"
