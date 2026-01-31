@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import sys
 
+from typing import Literal, Tuple
+
 from prompt_toolkit import prompt
 from rich.console import Console
 from rich.table import Table
@@ -31,39 +33,77 @@ def prompt_query(console: Console) -> str | None:
     return value
 
 
-def show_results(console: Console, results: list[SearchResult]) -> None:
-    table = Table(title="Search Results", show_lines=False)
+def show_results(
+    console: Console,
+    results: list[SearchResult],
+    *,
+    page: int,
+    page_size: int,
+    total_known: int,
+    more_available: bool,
+) -> None:
+    start_index = page * page_size
+    showing_end = start_index + len(results)
+    more_label = "+" if more_available else ""
+    title = (
+        f"Search Results — Page {page + 1} "
+        f"[{start_index + 1}-{showing_end} of {total_known}{more_label}]"
+    )
+
+    table = Table(title=title, show_lines=False)
     table.add_column("#", justify="right", style="cyan")
     table.add_column("Title", style="bold")
     table.add_column("Channel", style="magenta")
     table.add_column("Duration", justify="right", style="green")
 
-    for index, item in enumerate(results, start=1):
+    for index, item in enumerate(results, start=start_index + 1):
         table.add_row(str(index), item.title, item.channel, item.duration)
 
     console.print(table)
 
 
-def prompt_selection(console: Console, total: int) -> int | None:
-    """Return zero-based index of the chosen result or ``None`` to search again."""
+SelectionAction = Literal["play", "next", "prev", "search"]
+
+
+def prompt_selection(
+    console: Console,
+    *,
+    total: int,
+    offset: int,
+    has_prev: bool,
+    has_next: bool,
+) -> Tuple[SelectionAction, int | None]:
+    """Return the chosen action and (optionally) the index on the page."""
+
+    prompt_text = "Pick a number to play, 'n' next page, 'p' previous, enter=search again, q=quit: "
 
     while True:
         try:
-            raw = _read_line("Pick a track (enter=search again, q=quit): ")
+            raw = _read_line(prompt_text)
         except QuitRequested:
             raise
 
         choice = raw.strip().lower()
-        if choice in {"", "b", "back"}:
-            return None
+        if choice in {"", "s", "search", "back"}:
+            return "search", None
         if choice in {"q", "quit", "exit"}:
             raise QuitRequested
+        if choice in {"n", "next"}:
+            if has_next:
+                return "next", None
+            console.print("[yellow]You are already on the last page.[/]")
+            continue
+        if choice in {"p", "prev", "previous"}:
+            if has_prev:
+                return "prev", None
+            console.print("[yellow]You are already on the first page.[/]")
+            continue
         if choice.isdigit():
-            index = int(choice) - 1
-            if 0 <= index < total:
-                return index
+            absolute_index = int(choice) - 1
+            if offset <= absolute_index < offset + total:
+                return "play", absolute_index - offset
         console.print(
-            "Invalid selection. Choose a number from the list or press enter to search again."
+            "Invalid selection. Choose a visible number, use 'n'/'p' to navigate, or enter to search again."
         )
 
 

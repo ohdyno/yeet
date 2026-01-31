@@ -7,6 +7,7 @@ Interactive CLI that lets you search YouTube, pick a result, and stream audio-on
 - Rich-formatted results table showing title, channel, and duration for the top matches.
 - Streams audio via `mpv --no-video` so you get music without video windows.
 - Graceful handling of missing binaries, empty searches, cancelled playback, and other runtime hiccups.
+- Paginated results with `n` / `p` controls so you can go beyond the first 10 matches.
 
 ## Prerequisites
 - [`mise`](https://mise.jdx.dev) for toolchain orchestration.
@@ -35,8 +36,8 @@ uv run python -m yeet_player
 
 Flow:
 1. Enter a search phrase (e.g., `lofi hip hop`).
-2. Review the numbered list of results.
-3. Pick a track number to stream audio via `mpv`.
+2. Review the numbered list of results; press `n` / `p` to move between pages.
+3. Pick any visible track number (the numbering is global) to stream audio via `mpv`.
 4. Press enter to launch a new search or `q` to quit at any prompt.
 
 ## Project Structure
